@@ -59,31 +59,42 @@ const createProgram = (gl, vertexShader, fragmentShader) => {
 
 /**
  * @description Initialize buffers in GPU before drawing the object.
+ * @param {WebGL2RenderingContext} gl - WebGL context.
  * @param {number[]} vertices - vertices of shape.
- * @param {number[]} rgbVal - color of shape.
- * @returns {number} number of count to draw shape.
+ * @param {number[]} faceColors - colors of each face.
+ * @param {number[]} indices - vertices topology.
+ * @returns {object} program.
  */
-const initBuffers = (vertices, rgbVal) => {
+const initBuffers = (gl, vertices, faceColors, indices) => {
     // Binding data
-    var buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-    // Use the program
-    gl.useProgram(program);
+    // Convert the array of colors into a table for all the vertices.
+    let colors = [];
+    for (var j = 0; j < faceColors.length; ++j) {
+        const c = faceColors[j];
+        // Repeat each color four times for the four vertices of the face
+        colors = colors.concat(c, c, c, c);
+    }
+    // Create the color buffer.
+    const colorBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
-    // Set the color
-    program.color = gl.getUniformLocation(program, 'color');
-    rgbVal = normalizeRGB(...rgbVal);
+    // Build the element array buffer; this specifies the indices
+    // into the vertex arrays for each face's vertices.
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    // Now send the element array to GL
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
 
-    gl.uniform4f(program.color, rgbVal[0], rgbVal[1], rgbVal[2], 1);
-
-    // Set the position
-    program.position = gl.getAttribLocation(program, 'position');
-    gl.enableVertexAttribArray(program.position);
-    gl.vertexAttribPointer(program.position, 2, gl.FLOAT, false, 0, 0);
-
-    return vertices.length / 2;
+    return {
+        position: positionBuffer,
+        color: colorBuffer,
+        indices: indexBuffer,
+    };
 };
 
 /**
@@ -97,77 +108,127 @@ const render = (type, vertices, rgbVal) => {
     gl.drawArrays(type, 0, n);
 };
 
-const shapePointFactory = (id, x, y) => {
-    // Get point coordinates.
-    const x1 = x - pointSize / 2;
-    const y1 = y - pointSize / 2;
-    const x2 = x1 + pointSize;
-    const y2 = y1 + pointSize;
 
-    // Construct and save shape point object.
-    const shapePointVertices = [x1, y1, x2, y1, x1, y2, x2, y2];
-    return new ShapePoint(id, shapePointVertices);
-};
-
-/**
- * @description  Draw object point (square in each edge of object).
- * @param {Shape} shape
- */
-const renderShapePoint = (shape) => {
-    const numOfPoints = shape.vertices.length / 2;
-    for (let i = 0; i < numOfPoints; i++) {
-        const shapePoint = shapePointFactory(
-            shape.id,
-            shape.vertices[i * 2],
-            shape.vertices[i * 2 + 1]
-        );
-        allShapePoints.push(shapePoint);
-
-        // Render the point.
-        // Triangle Strip will draw complex object based on vertices .
-        render(gl.TRIANGLE_STRIP, shapePoint.vertices, [0, 0, 0]);
+//
+// Draw the scene.
+//
+function drawScene(gl, programInfo, buffers, deltaTime) {
+    console.log(programInfo);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);  // Clear to black, fully opaque
+    gl.clearDepth(1.0);                 // Clear everything
+    gl.enable(gl.DEPTH_TEST);           // Enable depth testing
+    gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
+  
+    // Clear the canvas before we start drawing on it.
+  
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  
+    // Create a perspective matrix, a special matrix that is
+    // used to simulate the distortion of perspective in a camera.
+    // Our field of view is 45 degrees, with a width/height
+    // ratio that matches the display size of the canvas
+    // and we only want to see objects between 0.1 units
+    // and 100 units away from the camera.
+  
+    const fieldOfView = 45 * Math.PI / 180;   // in radians
+    const aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
+    const zNear = 0.1;
+    const zFar = 100.0;
+    const projectionMatrix = mat4.create();
+  
+    // note: glmatrix.js always has the first argument
+    // as the destination to receive the result.
+    mat4.perspective(projectionMatrix,
+                     fieldOfView,
+                     aspect,
+                     zNear,
+                     zFar);
+  
+    // Set the drawing position to the "identity" point, which is
+    // the center of the scene.
+    const modelViewMatrix = mat4.create();
+  
+    // Now move the drawing position a bit to where we want to
+    // start drawing the square.
+  
+    mat4.translate(modelViewMatrix,     // destination matrix
+                   modelViewMatrix,     // matrix to translate
+                   [-0.0, 0.0, -6.0]);  // amount to translate
+    mat4.rotate(modelViewMatrix,  // destination matrix
+                modelViewMatrix,  // matrix to rotate
+                cubeRotation,     // amount to rotate in radians
+                [0, 0, 1]);       // axis to rotate around (Z)
+    mat4.rotate(modelViewMatrix,  // destination matrix
+                modelViewMatrix,  // matrix to rotate
+                cubeRotation * .7,// amount to rotate in radians
+                [0, 1, 0]);       // axis to rotate around (X)
+  
+    // Tell WebGL how to pull out the positions from the position
+    // buffer into the vertexPosition attribute
+    {
+      const numComponents = 3;
+      const type = gl.FLOAT;
+      const normalize = false;
+      const stride = 0;
+      const offset = 0;
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.position);
+      gl.vertexAttribPointer(
+          programInfo.attribLocations.vertexPosition,
+          numComponents,
+          type,
+          normalize,
+          stride,
+          offset);
+      gl.enableVertexAttribArray(
+          programInfo.attribLocations.vertexPosition);
     }
-
-    if (isMidPointDebug) {
-        const [midX, midY] = getMiddlePoint(shape.vertices);
-        const midShapePoint = shapePointFactory(shape.id, midX, midY);
-        allShapePoints.push(midShapePoint);
-        render(gl.TRIANGLE_STRIP, midShapePoint.vertices, [255, 0, 0]);
+  
+    // Tell WebGL how to pull out the colors from the color buffer
+    // into the vertexColor attribute.
+    {
+      const numComponents = 4;
+      const type = gl.FLOAT;
+      const normalize = false;
+      const stride = 0;
+      const offset = 0;
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffers.color);
+      gl.vertexAttribPointer(
+          programInfo.attribLocations.vertexColor,
+          numComponents,
+          type,
+          normalize,
+          stride,
+          offset);
+      gl.enableVertexAttribArray(
+          programInfo.attribLocations.vertexColor);
     }
-};
-
-/**
- * @description Draw all object.
- */
-const renderAll = () => {
-    // Reset All point data.
-    allShapePoints = [];
-
-    // Redraw all shape and refill all point.
-    allShapes.forEach((shape) => {
-        render(shape.type, shape.vertices, shape.rgbVal);
-        renderShapePoint(shape);
-    });
-};
-
-// ======================
-// Main program
-
-// Init webgl.
-const gl = canvas.getContext('webgl');
-if (!gl) {
-    alert('Your browser does not support WebGL.');
-}
-
-// Set webgl viewport.
-gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-// Clear the canvas.
-gl.clearColor(0.8, 0.8, 0.8, 1);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-// Create shader and program.
-const vertexShader = initShader(gl, gl.VERTEX_SHADER, vert);
-const fragmentShader = initShader(gl, gl.FRAGMENT_SHADER, frag);
-const program = createProgram(gl, vertexShader, fragmentShader);
-// ======================
+  
+    // Tell WebGL which indices to use to index the vertices
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
+  
+    // Tell WebGL to use our program when drawing
+  
+    gl.useProgram(programInfo.program);
+  
+    // Set the shader uniforms
+  
+    gl.uniformMatrix4fv(
+        programInfo.uniformLocations.projectionMatrix,
+        false,
+        projectionMatrix);
+    gl.uniformMatrix4fv(
+        programInfo.uniformLocations.modelViewMatrix,
+        false,
+        modelViewMatrix);
+  
+    {
+      const vertexCount = 36;
+      const type = gl.UNSIGNED_SHORT;
+      const offset = 0;
+      gl.drawElements(gl.TRIANGLES, vertexCount, type, offset);
+    }
+  
+    // Update the rotation for the next draw
+  
+    cubeRotation += deltaTime;
+  }

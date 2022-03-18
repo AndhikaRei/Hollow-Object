@@ -40,32 +40,33 @@ class ShapePoint {
 }
 
 
-// Vertex Shader configuration.
-/** @type {string} */
+/** 
+ * @type {string} 
+ * @description Vertex shader source code.
+*/
 const vert = `
-	// Attribute that receive data from buffer.
-	attribute vec2 position;	
-	
-	// Vertex Shader main program.
-	void main() {
-		// Special variable in vertex shader. 
-		gl_Position = vec4(position, 0.0, 1.0);
-	}
+    // Vertex shader attribute.
+    attribute vec4 aVertexPosition;
+    attribute vec4 aVertexColor;
+    uniform mat4 uModelViewMatrix;
+    uniform mat4 uProjectionMatrix;
+    varying lowp vec4 vColor;
+    
+    void main(void) {
+        gl_Position = uProjectionMatrix * uModelViewMatrix * aVertexPosition;
+        vColor = aVertexColor;
+    }
 `;
 
-// Fragmen Shader configuration.
-/** @type {string} */
+/** 
+ * @type {string} 
+ * @description Fragment shader source code.
+ * */
 const frag = `
-	// Fragment shader precision.
-	precision highp float;
-	
-	// Attribute that receive data from buffer.
-	uniform vec4 color;
-	
-	// Fragment Shader main program.
-	void main() {
-  		gl_FragColor = color;
-	}
+    varying lowp vec4 vColor;
+    void main(void) {
+        gl_FragColor = vColor;
+    }
 `;
 
 // HTML ELEMENTS.
