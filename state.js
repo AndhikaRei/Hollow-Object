@@ -107,6 +107,8 @@ const helpBtn = document.getElementById('help-button');
 /** @type {HTMLButtonElement} */
 const content = document.getElementById('help-content');
 
+// Main
+let cubeRotation = 0.0;
 
 // Utility.
 /** @type {number} */
@@ -116,62 +118,3 @@ const middleY = canvas.height / 2;
 /** @type {boolean} */
 let isHelpActive = false;
 
-const toggleRecoloring = (state) => {
-    if (isDragging || isResizing) {
-        return alert('Anda sedang melakukan resizing/dragging.');
-    }
-    if (state === undefined || state === null) {
-        isRecoloring = !isRecoloring;
-    } else {
-        isRecoloring = state;
-    }
-
-    if (isRecoloring) {
-        showTask('Mengubah warna');
-        container.classList.add('bucket');
-    } else {
-        hideTask();
-        container.classList.remove('bucket');
-    }
-};
-
-const toggleDragging = (state) => {
-    if (isResizing || isRecoloring) {
-        return alert('Anda sedang melakukan resizing/recoloring.');
-    }
-    if (state === undefined || state === null) {
-        isDragging = !isDragging;
-    } else {
-        isDragging = state;
-    }
-
-    if (isDragging) {
-        container.classList.add('grabbing');
-        const task = setTimeout(() => {
-            showTask('Mengubah posisi ' + draggingMetadata.shapeName);
-            clearTimeout(task);
-        }, 10);
-    } else {
-        container.classList.remove('grabbing');
-        hideTask();
-    }
-};
-
-const toggleResizing = (state) => {
-    if (isDragging || isRecoloring) {
-        return alert('Anda sedang melakukan dragging/recoloring.');
-    }
-    if (state === undefined || state === null) {
-        isResizing = !isResizing;
-    } else {
-        isResizing = state;
-    }
-
-    if (isResizing) {
-        showTask('Meresize bentuk');
-        container.classList.add('resizing');
-    } else {
-        hideTask();
-        container.classList.remove('resizing');
-    }
-};
