@@ -1,45 +1,5 @@
 'use strict';
 
-// Object Definition.
-/**
- * Shape Class Definition.
- * Represent shape that can be drawn in CAD.
- */
-class Shape {
-    /**
-     * Constructor.
-     * @param {string} id - Shape id.
-     * @param {string} type - Gl method to draw this shape, ex: gl.LINES.
-     * @param {number[]} vertices - Shape array of coordinate, ex [0.5, 0.5, 0.5].
-     * @param {number[]} rgbVal - Shape array of rgb color, ex [0.5, 0.5, 0.5].
-     * @param {array} edges - Shape name.
-     */
-    constructor(id, type, vertices, rgbVal, shapeName) {
-        this.id = id;
-        this.type = type;
-        this.shapeName = shapeName;
-        this.vertices = vertices;
-        this.rgbVal = rgbVal;
-    }
-}
-
-/**
- * Shape Point Class Definition.
- * Represent edge in shape.
- */
-class ShapePoint {
-    /**
-     * Constructor.
-     * @param {number} object_id - Corresponding shape id.
-     * @param {number[]} vertices - Array of , ex [0.5, 0.5, 0.5].
-     */
-    constructor(object_id, vertices) {
-        this.object_id = object_id;
-        this.vertices = vertices;
-    }
-}
-
-
 /** 
  * @type {string} 
  * @description Vertex shader source code.
@@ -108,7 +68,12 @@ const helpBtn = document.getElementById('help-button');
 const content = document.getElementById('help-content');
 
 // Main
+/** @type {number} */
 let cubeRotation = 0.0;
+/**@type {HollowObject} */
+let hollowObject = null;
+/**@type {WebGlManager} */
+let webglManager = null;
 
 // Utility.
 /** @type {number} */

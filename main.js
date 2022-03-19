@@ -26,74 +26,65 @@ function main() {
 	const shaderProgram = createProgram(gl, vertexShader, fragmentShader);
 
 	// Init webglManager.
-	let webglManager = new WebGlManager(gl, vertexShader, fragmentShader, shaderProgram);
+	webglManager = new WebGlManager(gl, vertexShader, fragmentShader, shaderProgram);
 
-	// Object to be used in init buffers.
-	// Now create an array of positions for the cube.
-	const vertices = [
-		// Front face
-		-1.0, -1.0,  1.0,
-		1.0, -1.0,  1.0,
-		1.0,  1.0,  1.0,
-		-1.0,  1.0,  1.0,
+// 	// Object to be used in init buffers.
+// 	// Now create an array of positions for the cube.
+// 	const vertices = [
+// 		// Front face
+// 		-1.0, -1.0,  1.0,
+// 		1.0, -1.0,  1.0,
+// 		1.0,  1.0,  1.0,
+// 		-1.0,  1.0,  1.0,
 
-		// Back face
-		-1.0, -1.0, -1.0,
-		-1.0,  1.0, -1.0,
-		1.0,  1.0, -1.0,
-		1.0, -1.0, -1.0,
+// 		// Back face
+// 		-1.0, -1.0, -1.0,
+// 		-1.0,  1.0, -1.0,
+// 		1.0,  1.0, -1.0,
+// 		1.0, -1.0, -1.0,
 
-		// Top face
-		-1.0,  1.0, -1.0,
-		-1.0,  1.0,  1.0,
-		1.0,  1.0,  1.0,
-		1.0,  1.0, -1.0,
+// 		// Top face
+// 		-1.0,  1.0, -1.0,
+// 		-1.0,  1.0,  1.0,
+// 		1.0,  1.0,  1.0,
+// 		1.0,  1.0, -1.0,
 
-		// Bottom face
-		-1.0, -1.0, -1.0,
-		1.0, -1.0, -1.0,
-		1.0, -1.0,  1.0,
-		-1.0, -1.0,  1.0,
+// 		// Bottom face
+// 		-1.0, -1.0, -1.0,
+// 		1.0, -1.0, -1.0,
+// 		1.0, -1.0,  1.0,
+// 		-1.0, -1.0,  1.0,
 
-		// Right face
-		1.0, -1.0, -1.0,
-		1.0,  1.0, -1.0,
-		1.0,  1.0,  1.0,
-		1.0, -1.0,  1.0,
+// 		// Right face
+// 		1.0, -1.0, -1.0,
+// 		1.0,  1.0, -1.0,
+// 		1.0,  1.0,  1.0,
+// 		1.0, -1.0,  1.0,
 
-		// Left face
-		-1.0, -1.0, -1.0,
-		-1.0, -1.0,  1.0,
-		-1.0,  1.0,  1.0,
-		-1.0,  1.0, -1.0,
-	];   
+// 		// Left face
+// 		-1.0, -1.0, -1.0,
+// 		-1.0, -1.0,  1.0,
+// 		-1.0,  1.0,  1.0,
+// 		-1.0,  1.0, -1.0,
+// 	];   
 
-  // Now set up the colors for the faces. We'll use solid colors
-  // for each face.
-  const faceColors = [
-	[1.0,  1.0,  1.0,  1.0],    // Front face: white
-	[1.0,  0.0,  0.0,  1.0],    // Back face: red
-	[0.0,  1.0,  0.0,  1.0],    // Top face: green
-	[0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
-	[1.0,  1.0,  0.0,  1.0],    // Right face: yellow
-	[1.0,  0.0,  1.0,  1.0],    // Left face: purple
-  ];
-
-  // Now pass the list of positions into WebGL to build the
-  // shape. We do this by creating a Float32Array from the
-  // JavaScript array, then use it to fill the current buffer.
-  const indices = [
-	0,  1,  2,      0,  2,  3,    // front
-	4,  5,  6,      4,  6,  7,    // back
-	8,  9,  10,     8,  10, 11,   // top
-	12, 13, 14,     12, 14, 15,   // bottom
-	16, 17, 18,     16, 18, 19,   // right
-	20, 21, 22,     20, 22, 23,   // left
-  ];
+//   // Now set up the colors for the faces. We'll use solid colors
+//   // for each face.
+//   const faceColors = [
+// 	[1.0,  1.0,  1.0,  1.0],    // Front face: white
+// 	[1.0,  0.0,  0.0,  1.0],    // Back face: red
+// 	[0.0,  1.0,  0.0,  1.0],    // Top face: green
+// 	[0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
+// 	[1.0,  1.0,  0.0,  1.0],    // Right face: yellow
+// 	[1.0,  0.0,  1.0,  1.0],    // Left face: purple
+//   ];
 
   // Here's where we call the routine that builds all the
   // objects we'll be drawing.
-  const buffers = webglManager.initBuffers(vertices, faceColors, indices);
+  // Load basic cube.
+  hollowObject = loadBasicCube();
+  webglManager.initBuffersHollow(hollowObject);
+//   const buffers = webglManager.initBuffers(vertices, faceColors);
 
 
   var then = 0;
@@ -102,9 +93,8 @@ function main() {
 	now *= 0.001;  // convert to seconds
 	const deltaTime = now - then;
 	then = now;
-
-	const vertexCount = 36;
-	webglManager.drawScene(buffers, deltaTime, vertexCount);
+	// Draw for every buffer exists in webglManager.
+	webglManager.drawHollowObjectScene(deltaTime)
 
 	requestAnimationFrame(render);
   }

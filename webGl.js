@@ -136,6 +136,28 @@ class WebGlManager {
          * @public
          */
         this.programInfo = new programInfo(this.program, this.gl);
+        
+        // Buffer for rendering hollow object
+        /**
+         * buffers - buffer for rendering hollow object.
+         * @type {Buffers[]}
+         * @public
+         */
+        this.buffers = []
+
+        /**
+         * vertices - list of vertices that ready to be drawn.
+         * @type {number[][]}
+         * @public
+         */
+        this.vertices = []
+        
+        /**
+         * colors - list of colors that ready to be drawn.
+         * @type {number[][]}
+         * @public
+         */
+        this.faceColors = []
     }
 
     /**
@@ -198,7 +220,7 @@ class WebGlManager {
      * @param {number[]} indices - vertices topology.
      * @returns {Buffers} program buffer.
      */
-    initBuffers(vertices, faceColors, indices){
+    initBuffers(vertices, faceColors){
         // Binding data
         const positionBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
@@ -220,11 +242,72 @@ class WebGlManager {
         // into the vertex arrays for each face's vertices.
         const indexBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+        // Now pass the list of positions into WebGL to build the
+        // shape. We do this by creating a Float32Array from the
+        // JavaScript array, then use it to fill the current buffer.
+        const indices = [
+            0,  1,  2,      0,  2,  3,    // front
+            4,  5,  6,      4,  6,  7,    // back
+            8,  9,  10,     8,  10, 11,   // top
+            12, 13, 14,     12, 14, 15,   // bottom
+            16, 17, 18,     16, 18, 19,   // right
+            20, 21, 22,     20, 22, 23,   // left
+        ];
         // Now send the element array to GL
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
 
         return new Buffers(positionBuffer, colorBuffer, indexBuffer);
     };
+
+    /**
+     * @description Init buffer from given hollow object.
+     * @param {HollowObject} hollowObject 
+     */
+    initBuffersHollow(hollowObject){
+        const webGlBufferData = hollowObject.getWebGlBufferData();
+        const vertices = webGlBufferData.glVertices;
+        const faceColors = webGlBufferData.glFaceColors;
+
+        // console.log(vertices);
+        // console.log(faceColors);
+
+        // Save vertex positions and colors.
+        this.vertices = vertices;
+        this.faceColors = faceColors;
+        
+        // Ini buffer for all edges.
+        for (let i = 0; i < vertices.length; i ++) {
+            const buffer = this.initBuffers(vertices[i], faceColors[i]);
+            this.buffers.push(buffer);
+        }
+    }
+
+    /**
+     * @description clear all buffers and clear screen.
+     */
+    clearScreen() {
+        this.gl.clearColor(0.8, 0.8, 0.8, 1.0);  // Clear to black, fully opaque
+        this.gl.clearDepth(1.0);                 // Clear everything
+        this.gl.enable(this.gl.DEPTH_TEST);      // Enable depth testing
+        this.gl.depthFunc(this.gl.LEQUAL);       // Near things obscure far things
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+    }
+
+    drawHollowObjectScene(deltaTime) {
+        // Clear the screen
+        this.clearScreen();
+        // console.log(this.vertices);
+
+        // Draw for every buffer exist in this.buffers.
+        for (let i = 0; i < this.buffers.length; i++) {
+            // if vertices is undefined then delay
+            if (this.vertices[i] === undefined) {
+                continue;
+            }
+            this.drawScene(this.buffers[i], deltaTime, this.vertices[i].length / 2);
+        }
+    }
 
     /**
      * @description Draw scenarion.
@@ -234,11 +317,6 @@ class WebGlManager {
      * @param {number} cubeRotation - cube rotation.
      */
     drawScene(buffers, deltaTime, vertexCount) {
-        this.gl.clearColor(0.8, 0.8, 0.8, 1);  // Clear to white, fully opaque
-        this.gl.clearDepth(1.0);                 // Clear everything
-        this.gl.enable(this.gl.DEPTH_TEST);           // Enable depth testing
-        this.gl.depthFunc(this.gl.LEQUAL);            // Near things obscure far things
-      
         // Clear the canvas before we start drawing on it.
       
        this. gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);

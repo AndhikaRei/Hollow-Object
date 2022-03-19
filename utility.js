@@ -82,29 +82,3 @@ const normalizeRGB = (r, g, b) => {
 };
 
 
-/**
- * @description imports json file to render, json file from export above
- */
-const importData = () => {
-    var fileInput = document.getElementById('fileinput');
-    var data = fileInput.files[0];
-
-    if (!data) {
-        alert('File gagal di-import');
-        return;
-    }
-
-    var reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            var shapes = JSON.parse(e.target.result);
-        } catch (e) {
-            alert('File gagal di-import');
-            return;
-        }
-
-        if (!shapes) return;
-        // TODO: implement loadfile logic.
-    };
-    reader.readAsText(data);
-};
