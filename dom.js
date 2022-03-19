@@ -14,43 +14,35 @@
 
     var reader = new FileReader();
     reader.onload = (e) => {
+        let hollowObj = null;
         try {
-            let hollowObj = JSON.parse(e.target.result);
+            hollowObj = JSON.parse(e.target.result);
             if (!hollowObj) return;
-            // Construct new egde object from parsed json.
-            let edges = [];
-            for (let i = 0; i < hollowObj.edge.length; i++) {
-                let currentEdge = hollowObj.edge[i];
-                let currentTopology = currentEdge.topology;
-                let newTopology = [];
-                for (let j = 0; j < currentTopology.length; j++) {
-                    let currentFace = currentTopology[j];
-                    let newFace = [];
-                    for (let k = 0; k < currentFace.length; k++) {
-                        let currentVertex = currentFace[k];
-                        newFace.push(currentVertex);
-                    }
-                    newTopology.push(newFace);
-                }
-                let newEdge = new Edge(currentEdge.color, newTopology);
-                edges.push(newEdge);
-            }
-
-            // Construct new vertex object from parsed json.
-            let vertices = [];
-            for (let i = 0; i < hollowObj.vertices.length; i++) {
-                let currentVertex = hollowObj.vertices[i];
-                vertices.push(currentVertex);
-            }
-
-            // Construct new hollow object from parsed json.
-            hollowObject = new HollowObject(vertices, edges);
-            webglManager.initBuffersHollow(hollowObject);
+            
         } catch (e) {
-            alert('File gagal di-import');
+            // Alert error message.
+            alert(e.message);
             return;
         }
 
+        // Construct new egde object from parsed json.
+        let edges = [];
+        for (let i = 0; i < hollowObj.edge.length; i++) {
+            let currentEdge = hollowObj.edge[i];
+            let newEdge = new Edge(currentEdge.topology, currentEdge.color);
+            edges.push(newEdge);
+        }
+
+        // Construct new vertex object from parsed json.
+        let vertices = hollowObj.vertices;
+
+        // Construct new hollow object from parsed json.
+        hollowObject = null;
+        hollowObject = new HollowObject(vertices, edges);
+        webglManager.clearScreen();
+        webglManager.initBuffersHollow(hollowObject);
+        cancelAnimationFrame(animationFrame);
+        animationFrame = requestAnimationFrame(render);
 
     };
     reader.readAsText(data);

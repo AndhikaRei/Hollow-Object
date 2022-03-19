@@ -265,6 +265,7 @@ class WebGlManager {
      * @param {HollowObject} hollowObject 
      */
     initBuffersHollow(hollowObject){
+        this.clearScreen();
         const webGlBufferData = hollowObject.getWebGlBufferData();
         const vertices = webGlBufferData.glVertices;
         const faceColors = webGlBufferData.glFaceColors;
@@ -297,14 +298,14 @@ class WebGlManager {
     drawHollowObjectScene(deltaTime) {
         // Clear the screen
         this.clearScreen();
-        // console.log(this.vertices);
 
         // Draw for every buffer exist in this.buffers.
         for (let i = 0; i < this.buffers.length; i++) {
             // if vertices is undefined then delay
-            if (this.vertices[i] === undefined) {
-                continue;
-            }
+            // console.log(this.vertices[i]);
+            // if (this.vertices[i] === undefined) {
+            //     continue;
+            // }
             this.drawScene(this.buffers[i], deltaTime, this.vertices[i].length / 2);
         }
     }
@@ -317,9 +318,6 @@ class WebGlManager {
      * @param {number} cubeRotation - cube rotation.
      */
     drawScene(buffers, deltaTime, vertexCount) {
-        // Clear the canvas before we start drawing on it.
-      
-       this. gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
       
         // Create a perspective matrix, a special matrix that is
         // used to simulate the distortion of perspective in a camera.

@@ -1,6 +1,30 @@
 'use strict';
 
+// Main
+/** @type {number} */
+let cubeRotation = 0.0;
+/**@type {HollowObject} */
+let hollowObject = null;
+/**@type {WebGlManager} */
+let webglManager = null;
+/** @type {number} */
+let animationFrame = 0;
+
 main();
+
+var then = 0;
+// Draw the scene repeatedly
+function render(now) {
+	now *= 0.0001;  // convert to seconds
+	const deltaTime = now - then;
+	then = now;
+
+	// Draw for every buffer exists in webglManager
+	webglManager.drawHollowObjectScene(deltaTime);
+
+	// TURN ON THIS TO SEE ROTATE THE OBJECT.
+	animationFrame = requestAnimationFrame(render);
+}
 
 //
 // Start here
@@ -79,26 +103,17 @@ function main() {
 // 	[1.0,  0.0,  1.0,  1.0],    // Left face: purple
 //   ];
 
-  // Here's where we call the routine that builds all the
-  // objects we'll be drawing.
-  // Load basic cube.
-  hollowObject = loadBasicCube();
-  webglManager.initBuffersHollow(hollowObject);
+  	// Here's where we call the routine that builds all the
+  	// objects we'll be drawing.
+  	// Load cube.
+  	hollowObject = loadHollowCube();
+
+  	// console.log(JSON.stringify(hollowObject));
+  	webglManager.initBuffersHollow(hollowObject);
 //   const buffers = webglManager.initBuffers(vertices, faceColors);
 
-
-  var then = 0;
-  // Draw the scene repeatedly
-  function render(now) {
-	now *= 0.001;  // convert to seconds
-	const deltaTime = now - then;
-	then = now;
-	// Draw for every buffer exists in webglManager.
-	webglManager.drawHollowObjectScene(deltaTime)
-
-	requestAnimationFrame(render);
-  }
-  requestAnimationFrame(render);
+  
+   animationFrame = requestAnimationFrame(render);
 }
 
 

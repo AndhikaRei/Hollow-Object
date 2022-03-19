@@ -67,13 +67,6 @@ const helpBtn = document.getElementById('help-button');
 /** @type {HTMLButtonElement} */
 const content = document.getElementById('help-content');
 
-// Main
-/** @type {number} */
-let cubeRotation = 0.0;
-/**@type {HollowObject} */
-let hollowObject = null;
-/**@type {WebGlManager} */
-let webglManager = null;
 
 // Utility.
 /** @type {number} */
