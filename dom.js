@@ -1,5 +1,8 @@
 'use strict';
 
+/**
+ * @description reset all data in hollow object and in user interface.
+ */
 const resetDefault = () => {
     // Reset translate.
     translateXSlider.value = 0;
@@ -50,17 +53,20 @@ const resetDefault = () => {
 }
 
 /**
- * @description imports json file to render, json file from export above
+ * @description imports json file to render as an hollow object.
  */
  const importData = () => {
+    // Get file input.
     var fileInput = document.getElementById('fileinput');
     var data = fileInput.files[0];
 
+    // Validate input file.
     if (!data) {
         alert('File gagal di-import');
         return;
     }
 
+    // Read file.
     var reader = new FileReader();
     reader.onload = (e) => {
         let hollowObj = null;
@@ -98,75 +104,110 @@ const resetDefault = () => {
 /**
  * Event listener
  */
+
 // Translate slider.
+// Slider translate x.
 translateXSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     translateXValue.innerHTML = translateXSlider.value;
     webglManager.translateValue[0] = 
-        translateXSlider.value/ (webglManager.gl.canvas.clientWidth/4) ;
+        translateXSlider.value/ (webglManager.gl.canvas.clientWidth/4);
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider translate y.
 translateYSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.translateValue[1] =
         translateYSlider.value/ (webglManager.gl.canvas.clientHeight/4);
     translateYValue.innerHTML = translateYSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider translate z.
 translateZslider.addEventListener('input', () => {
-    // TODO: Implement action in webglManager.
-    webglManager.translateValue[2] = translateZslider.value / 100;
+    // Change displayed value in UI and in hollow object.
+    webglManager.translateValue[2] = translateZslider.value / 50;
     translateZValue.innerHTML = translateZslider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
 
 // Rotate slider.
+// Slider rotate x.
 rotateXSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.rotateAngle[0] = rotateXSlider.value;
     rotateXValue.innerHTML = rotateXSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider rotate y.
 rotateYSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.rotateAngle[1] = rotateYSlider.value;
     rotateYValue.innerHTML = rotateYSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider rotate z.
 rotateZSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.rotateAngle[2] = rotateZSlider.value;
     rotateZValue.innerHTML = rotateZSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
 
 // Scale slider.
+// Slider scale x.
 scaleXSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object. 
     webglManager.scaleValue[0] = scaleXSlider.value;
     scaleXValue.innerHTML = scaleXSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider scale y.
 scaleYSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.scaleValue[1] = scaleYSlider.value;
     scaleYValue.innerHTML = scaleYSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider scale z.
 scaleZSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.scaleValue[2] = scaleZSlider.value;
     scaleZValue.innerHTML = scaleZSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
 
 // Camera slider.
+// Slider camera radius.
 cameraRadiusSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.cameraRadius = cameraRadiusSlider.value;
     cameraRadiusValue.innerHTML = cameraRadiusSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
+// Slider camera rotation.
 cameraRotateSlider.addEventListener('input', () => {
+    // Change displayed value in UI and in hollow object.
     webglManager.cameraRotation = cameraRotateSlider.value;
     cameraRotateValue.innerHTML = cameraRotateSlider.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
 
 // Projection View
 projectionView.addEventListener('change', () => {
+    // Change displayed in hollow object.
     webglManager.projectionType = projectionView.value;
+    // Re-draw hollow object.
     webglManager.drawHollowObjectScene();
 });
 

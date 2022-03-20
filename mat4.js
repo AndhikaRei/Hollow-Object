@@ -59,24 +59,33 @@ function cross(a, b) {
 const m4 = {
 	/**
 	 * @description Create lookAt matrix.
+	 * @param {number[]} cameraPosition - camera position
+	 * @param {number[]} target - target 
 	 */
 	lookAt: function(cameraPosition, target, up) {
-    var zAxis = normalize(
-        subtractVectors(cameraPosition, target));
-    var xAxis = normalize(cross(up, zAxis));
-    var yAxis = normalize(cross(zAxis, xAxis));
+		var zAxis = normalize(subtractVectors(cameraPosition, target));
+		var xAxis = normalize(cross(up, zAxis));
+		var yAxis = normalize(cross(zAxis, xAxis));
 
-    return [
-       xAxis[0], xAxis[1], xAxis[2], 0,
-       yAxis[0], yAxis[1], yAxis[2], 0,
-       zAxis[0], zAxis[1], zAxis[2], 0,
-       cameraPosition[0],
-       cameraPosition[1],
-       cameraPosition[2],
-       1,
-    ];
-  },
+		return [
+			xAxis[0], xAxis[1], xAxis[2], 0,
+			yAxis[0], yAxis[1], yAxis[2], 0,
+			zAxis[0], zAxis[1], zAxis[2], 0,
+			cameraPosition[0],
+			cameraPosition[1],
+			cameraPosition[2],
+			1,
+		];
+	},
 
+	/**
+	 * @description Create perspective matrix.
+	 * @param {number} fov - field of view
+	 * @param {number} aspect - aspect ratio
+	 * @param {number} near - near plane
+	 * @param {number} far - far plane
+	 * @returns {number[]} perspective matrix
+	 **/
 	perspective: function(fieldOfViewInRadians, aspect, near, far) {
 		var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
 		var rangeInv = 1.0 / (near - far);
@@ -89,36 +98,13 @@ const m4 = {
 		];
 	},
 
-	// fov, aspec, znear, zfar
-	perspective2: function(fieldOfViewInRadians, aspect, zNear, zFar) {
-		var u = 1 / Math.tan(fieldOfViewInRadians / 2);
-		var o = void 0;
-		var t = [];
-		t[0] = u / aspect;
-		t[1] = 0; 
-		t[2] = 0; 
-		t[3] = 0; 
-		t[4] = 0; 
-		t[5] = u; 
-		t[6] = 0; 
-		t[7] = 0; 
-		t[8] = 0; 
-		t[9] = 0; 
-		t[11] = -1; 
-		t[12] = 0;
-		t[13] = 0; 
-		t[15] = 0;
-		if (null != zFar && zFar !== 1 / 0 ) {
-			o = 1 / (zNear - zFar); 
-			t[10] = (zFar + zNear) * o; 
-			t[14] = 2 * zFar * zNear * o;
-		} else {
-			t[10] = -1
-			t[14] = -2 * zNear
-		}
-		return t
-	},
-
+	/**
+	 * @description Create projection matrix to flip Y axis.
+	 * @param {number} width - width of canvas
+	 * @param {number} height - height of canvas
+	 * @param {number} depth - depth of canvas
+	 * @returns {number[]} projection matrix
+	 **/
 	projection: function(width, height, depth) {
 		// Note: This matrix flips the Y axis so 0 is at the top.
 		return [
@@ -129,6 +115,16 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description Create orthographic matrix.
+	 * @param {number} left - left side of canvas
+	 * @param {number} right - right side of canvas
+	 * @param {number} bottom - bottom side of canvas
+	 * @param {number} top - top side of canvas
+	 * @param {number} near - Znear of canvas
+	 * @param {number} far - Zfar of canvas
+	 * @returns {number[]} orthographic matrix
+	 */
 	orthographic: function(left, right, bottom, top, near, far) {
 		return [
 			2 / (right - left), 0, 0, 0,
@@ -142,6 +138,12 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description Create oblique projection matrix.
+	 * @param {theta} theta - angle of oblique projection
+	 * @param {phi} phi - angle of oblique projection
+	 * @returns {number[]} oblique projection matrix
+	 **/
 	oblique: function (theta, phi) {
 		let t = theta * Math.PI / 180;
 		let p = phi * Math.PI / 180;
@@ -158,6 +160,12 @@ const m4 = {
 		return m4.transpose(matrix);
 	},
 
+	/**
+	 * @description Function to multiply two matrices.
+	 * @param {number[][]} a - matrix a
+	 * @param {number[][]} b - matrix b
+	 * @returns {number[][]} matrix a * matrix b
+	 **/
 	multiply: function(a, b) {
 		var a00 = a[0 * 4 + 0];
 		var a01 = a[0 * 4 + 1];
@@ -210,91 +218,101 @@ const m4 = {
 			b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
 		];
 	},
+
+	/**
+	 * @description Function to get the inverse of a matrix.
+	 * @param {number[][]} m - matrix m
+	 * @returns {number[][]} inverse of matrix a
+	 **/
 	inverse: function(m) {
-    var m00 = m[0 * 4 + 0];
-    var m01 = m[0 * 4 + 1];
-    var m02 = m[0 * 4 + 2];
-    var m03 = m[0 * 4 + 3];
-    var m10 = m[1 * 4 + 0];
-    var m11 = m[1 * 4 + 1];
-    var m12 = m[1 * 4 + 2];
-    var m13 = m[1 * 4 + 3];
-    var m20 = m[2 * 4 + 0];
-    var m21 = m[2 * 4 + 1];
-    var m22 = m[2 * 4 + 2];
-    var m23 = m[2 * 4 + 3];
-    var m30 = m[3 * 4 + 0];
-    var m31 = m[3 * 4 + 1];
-    var m32 = m[3 * 4 + 2];
-    var m33 = m[3 * 4 + 3];
-    var tmp_0  = m22 * m33;
-    var tmp_1  = m32 * m23;
-    var tmp_2  = m12 * m33;
-    var tmp_3  = m32 * m13;
-    var tmp_4  = m12 * m23;
-    var tmp_5  = m22 * m13;
-    var tmp_6  = m02 * m33;
-    var tmp_7  = m32 * m03;
-    var tmp_8  = m02 * m23;
-    var tmp_9  = m22 * m03;
-    var tmp_10 = m02 * m13;
-    var tmp_11 = m12 * m03;
-    var tmp_12 = m20 * m31;
-    var tmp_13 = m30 * m21;
-    var tmp_14 = m10 * m31;
-    var tmp_15 = m30 * m11;
-    var tmp_16 = m10 * m21;
-    var tmp_17 = m20 * m11;
-    var tmp_18 = m00 * m31;
-    var tmp_19 = m30 * m01;
-    var tmp_20 = m00 * m21;
-    var tmp_21 = m20 * m01;
-    var tmp_22 = m00 * m11;
-    var tmp_23 = m10 * m01;
+		var m00 = m[0 * 4 + 0];
+		var m01 = m[0 * 4 + 1];
+		var m02 = m[0 * 4 + 2];
+		var m03 = m[0 * 4 + 3];
+		var m10 = m[1 * 4 + 0];
+		var m11 = m[1 * 4 + 1];
+		var m12 = m[1 * 4 + 2];
+		var m13 = m[1 * 4 + 3];
+		var m20 = m[2 * 4 + 0];
+		var m21 = m[2 * 4 + 1];
+		var m22 = m[2 * 4 + 2];
+		var m23 = m[2 * 4 + 3];
+		var m30 = m[3 * 4 + 0];
+		var m31 = m[3 * 4 + 1];
+		var m32 = m[3 * 4 + 2];
+		var m33 = m[3 * 4 + 3];
+		var tmp_0  = m22 * m33;
+		var tmp_1  = m32 * m23;
+		var tmp_2  = m12 * m33;
+		var tmp_3  = m32 * m13;
+		var tmp_4  = m12 * m23;
+		var tmp_5  = m22 * m13;
+		var tmp_6  = m02 * m33;
+		var tmp_7  = m32 * m03;
+		var tmp_8  = m02 * m23;
+		var tmp_9  = m22 * m03;
+		var tmp_10 = m02 * m13;
+		var tmp_11 = m12 * m03;
+		var tmp_12 = m20 * m31;
+		var tmp_13 = m30 * m21;
+		var tmp_14 = m10 * m31;
+		var tmp_15 = m30 * m11;
+		var tmp_16 = m10 * m21;
+		var tmp_17 = m20 * m11;
+		var tmp_18 = m00 * m31;
+		var tmp_19 = m30 * m01;
+		var tmp_20 = m00 * m21;
+		var tmp_21 = m20 * m01;
+		var tmp_22 = m00 * m11;
+		var tmp_23 = m10 * m01;
 
-    var t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
-        (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-    var t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
-        (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-    var t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
-        (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-    var t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
-        (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+		var t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
+			(tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
+		var t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
+			(tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
+		var t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
+			(tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
+		var t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
+			(tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
 
-    var d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+		var d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
-    return [
-      d * t0,
-      d * t1,
-      d * t2,
-      d * t3,
-      d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
-            (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
-      d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
-            (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
-      d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
-            (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
-      d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
-            (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
-      d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
-            (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
-      d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
-            (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
-      d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
-            (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
-      d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
-            (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
-      d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
-            (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
-      d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
-            (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
-      d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
-            (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
-      d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
-            (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02))
-    ];
-  },
+		return [
+			d * t0,
+			d * t1,
+			d * t2,
+			d * t3,
+			d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
+					(tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
+			d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
+					(tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
+			d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
+					(tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
+			d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
+					(tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
+			d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
+					(tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
+			d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
+					(tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
+			d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
+					(tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
+			d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
+					(tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
+			d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
+					(tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
+			d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
+					(tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
+			d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
+					(tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
+			d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
+					(tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02))
+		];
+	},
 
+	/**
+	 * @description create identity matrix
+	 * @returns {number[][]} identity matrix
+	 */
 	identity: function() {
 		return [
 			1, 0, 0, 0,
@@ -304,6 +322,11 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description create transpose matrix
+	 * @param {number[][]} m matrix
+	 * @returns {number[][]} transpose matrix
+	 **/
 	transpose: function(m) {
 		return [
 			m[0], m[4], m[8], m[12],
@@ -313,6 +336,13 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description create translation matrix
+	 * @param {number} tx translation x
+	 * @param {number} ty translation y
+	 * @param {number} tz translation z
+	 * @returns {number[][]} translation matrix
+	 **/
 	translation: function(tx, ty, tz) {
 		return [
 			 1,  0,  0,  0,
@@ -322,17 +352,28 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description Multiply two matrices
+	 * @param {number[][]} v - matrix 
+	 * @param {number[][]} m - matrix
+	 * @returns {number[][]} result matrix
+	 */
 	vectorMultiply: function(v, m) {
-    var dst = [];
-    for (var i = 0; i < 4; ++i) {
-      dst[i] = 0.0;
-      for (var j = 0; j < 4; ++j) {
-        dst[i] += v[j] * m[j * 4 + i];
-      }
-    }
-    return dst;
+		var dst = [];
+		for (var i = 0; i < 4; ++i) {
+			dst[i] = 0.0;
+			for (var j = 0; j < 4; ++j) {
+				dst[i] += v[j] * m[j * 4 + i];
+			}
+		}
+		return dst;
   },
 
+  	/**
+	 * @description create rotation matrix in x-axis
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotation matrix
+	 **/ 
 	xRotation: function(angleInRadians) {
 		var c = Math.cos(angleInRadians);
 		var s = Math.sin(angleInRadians);
@@ -345,6 +386,11 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description create rotation matrix in y-axis
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotation matrix
+	 **/
 	yRotation: function(angleInRadians) {
 		var c = Math.cos(angleInRadians);
 		var s = Math.sin(angleInRadians);
@@ -357,6 +403,11 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description create rotation matrix in z-axis
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotation matrix
+	 **/
 	zRotation: function(angleInRadians) {
 		var c = Math.cos(angleInRadians);
 		var s = Math.sin(angleInRadians);
@@ -369,6 +420,13 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description create scaling matrix
+	 * @param {number} sx scaling x
+	 * @param {number} sy scaling y
+	 * @param {number} sz scaling z
+	 * @returns {number[][]} scaling matrix
+	 **/
 	scaling: function(sx, sy, sz) {
 		return [
 			sx, 0,  0,  0,
@@ -378,22 +436,56 @@ const m4 = {
 		];
 	},
 
+	/**
+	 * @description translate matrix m by factor tx, ty, tz
+	 * @param {number[][]} m matrix
+	 * @param {number} tx translation x
+	 * @param {number} ty translation y
+	 * @param {number} tz translation z
+	 * @returns {number[][]} translated matrix
+	 **/
 	translate: function(m, tx, ty, tz) {
 		return m4.multiply(m, m4.translation(tx, ty, tz));
 	},
 
+	/**
+	 * @description rotate matrix m by angleInRadians around x-axis
+	 * @param {number[][]} m matrix
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotated matrix
+	 **/
 	xRotate: function(m, angleInRadians) {
 		return m4.multiply(m, m4.xRotation(angleInRadians));
 	},
 
+	/**
+	 * @description rotate matrix m by angleInRadians around y-axis
+	 * @param {number[][]} m matrix
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotated matrix
+	 **/
 	yRotate: function(m, angleInRadians) {
 		return m4.multiply(m, m4.yRotation(angleInRadians));
 	},
 
+	/**
+	 * @description rotate matrix m by angleInRadians around z-axis
+	 * @param {number[][]} m matrix
+	 * @param {number} angleInRadians angle in radians
+	 * @returns {number[][]} rotated matrix
+	 **/
 	zRotate: function(m, angleInRadians) {
 		return m4.multiply(m, m4.zRotation(angleInRadians));
 	},
 
+	/**
+	 * @description scale matrix m by factor sx, sy, sz
+	 * @param {number[][]} m matrix
+	 * @param {number} sx scaling x
+	 * @param {number} sy scaling y
+	 * @param {number} sz scaling z
+	 * @returns {number[][]} scaled matrix
+	 **/
 	scale: function(m, sx, sy, sz) {
 		return m4.multiply(m, m4.scaling(sx, sy, sz));
 	},

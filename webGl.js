@@ -224,59 +224,6 @@ class WebGlManager {
     }
 
     /**
-     * @description Create shader.
-     * @param {number} type - gl.VERTEX_SHADER or gl.FRAGMENT_SHADER
-     * @param {string} source - shader source code
-     * @returns {WebGLShader} shader or null if failed
-     */
-    initShader(type, source) {
-        // Create and compile the shader.
-        let shader = this.gl.createShader(type);
-        this.gl.shaderSource(shader, source);
-        this.gl.compileShader(shader);
-
-        // Check compile status.
-        // If success then return the created shader.
-        let success = this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS);
-        if (success) {
-            return shader;
-        }
-
-        // If there is an error, log it and delete the shader.
-        console.error(this.gl.getShaderInfoLog(shader));
-        alert('Failed to initialize the shader.');
-        this.gl.deleteShader(shader);
-    };
-
-    /**
-     * @description Create shader program.
-     * @returns
-     */
-    createProgram(){
-        // Create program.
-        let program = this.gl.createProgram();
-
-        // Attach shader to program.
-        this.gl.attachShader(program, this.vertexShader);
-        this.gl.attachShader(program, this.fragmentShader);
-
-        // Link program.
-        this.gl.linkProgram(program);
-
-        // Check link status.
-        // If success then return the created program.
-        var success = this.gl.getProgramParameter(program, this.gl.LINK_STATUS);
-        if (success) {
-            return program;
-        }
-
-        // If there is an error, log it and delete the program.
-        console.error(this.gl.getProgramInfoLog(program));
-        alert('Failed to initialize the shader program.');
-        this.gl.deleteProgram(program);
-    };
-
-    /**
      * @description Initialize buffers in GPU before drawing the object.
      * @param {number[]} vertices - vertices of shape.
      * @param {number[]} faceColors - colors of each face.
@@ -333,9 +280,6 @@ class WebGlManager {
         const vertices = webGlBufferData.glVertices;
         const faceColors = webGlBufferData.glFaceColors;
 
-        // console.log(vertices);
-        // console.log(faceColors);
-
         // Save vertex positions and colors.
         this.vertices = vertices;
         this.faceColors = faceColors;
@@ -357,17 +301,15 @@ class WebGlManager {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
+    /**
+     * @description Draw all buffers.
+     */
     drawHollowObjectScene() {
         // Clear the screen
         this.clearScreen();
 
         // Draw for every buffer exist in this.buffers.
         for (let i = 0; i < this.buffers.length; i++) {
-            // if vertices is undefined then delay
-            // console.log(this.vertices[i]);
-            // if (this.vertices[i] === undefined) {
-            //     continue;
-            // }
             this.drawScene(this.buffers[i], this.vertices[i].length / 2);
         }
     }
@@ -402,6 +344,11 @@ class WebGlManager {
         return projectionMatrix;
     }
 
+    /**
+     * @description calculate model view matrix.
+     * @returns {number[][]} model view matrix.
+     * @public
+     */
     calculateModelViewMatrix(){
         // Generate camera matrix.
         let radius = this.cameraRadius;
@@ -440,73 +387,49 @@ class WebGlManager {
     drawScene(buffers, vertexCount) {
         this.gl.enable(this.gl.DEPTH_TEST);           // Enable depth testing
         this.gl.depthFunc(this.gl.LEQUAL); 
-    
-        // const projectionMatrix = m4.identity();
+
+        // Calculate projection matrix.
         const projectionMatrix = this.calculateProjectionMatrix();
-
-        // Set the drawing position to the "identity" point, which is
-        // the center of the scene.
-
-        // TODO: Buggy code
-        // const modelViewMatrix = m4.identity();
         const modelViewMatrix = this.calculateModelViewMatrix();
-
-        // const modelViewMatrix = mat4.create();
-      
-        // // Now move the drawing position a bit to where we want to
-        // // start drawing the square.
-      
-        // mat4.translate(modelViewMatrix,     // destination matrix
-        //                modelViewMatrix,     // matrix to translate
-        //                [-0.0, 0.0, -6.0]);  // amount to translate
-        // mat4.rotate(modelViewMatrix,  // destination matrix
-        //             modelViewMatrix,  // matrix to rotate
-        //             cubeRotation,     // amount to rotate in radians
-        //             [0, 0, 1]);       // axis to rotate around (Z)
-        // mat4.rotate(modelViewMatrix,  // destination matrix
-        //             modelViewMatrix,  // matrix to rotate
-        //             cubeRotation * .7,// amount to rotate in radians
-        //             [0, 1, 0]);       // axis to rotate around (X)
-
       
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute
         {
-          const numComponents = 3;
-          const type = this.gl.FLOAT;
-          const normalize = false;
-          const stride = 0;
-          const offset = 0;
-          this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position);
-          this.gl.vertexAttribPointer(
-              this.programInfo.attribLocations.vertexPosition,
-              numComponents,
-              type,
-              normalize,
-              stride,
-              offset);
-          this.gl.enableVertexAttribArray(
-              this.programInfo.attribLocations.vertexPosition);
+            const numComponents = 3;
+            const type = this.gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position);
+            this.gl.vertexAttribPointer(
+                this.programInfo.attribLocations.vertexPosition,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset);
+            this.gl.enableVertexAttribArray(
+                this.programInfo.attribLocations.vertexPosition);
         }
       
         // Tell WebGL how to pull out the colors from the color buffer
         // into the vertexColor attribute.
         {
-          const numComponents = 4;
-          const type = this.gl.FLOAT;
-          const normalize = false;
-          const stride = 0;
-          const offset = 0;
-          this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.color);
-          this.gl.vertexAttribPointer(
-              this.programInfo.attribLocations.vertexColor,
-              numComponents,
-              type,
-              normalize,
-              stride,
-              offset);
-          this.gl.enableVertexAttribArray(
-              this.programInfo.attribLocations.vertexColor);
+            const numComponents = 4;
+            const type = this.gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.color);
+            this.gl.vertexAttribPointer(
+                this.programInfo.attribLocations.vertexColor,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset);
+            this.gl.enableVertexAttribArray(
+                this.programInfo.attribLocations.vertexColor);
         }
       
         // Tell WebGL which indices to use to index the vertices
@@ -531,9 +454,7 @@ class WebGlManager {
             this.gl.drawElements(this.gl.TRIANGLES, vertexCount, type, offset);
         }
       
-        // Update the rotation for the next draw
-      
-      }
+    }
 }
 
 // ==================================================================================================

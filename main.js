@@ -1,33 +1,19 @@
 'use strict';
 
 // Main
-/** @type {number} */
-let cubeRotation = 0.0;
 /**@type {HollowObject} */
 let hollowObject = null;
 /**@type {WebGlManager} */
 let webglManager = null;
-/** @type {number} */
-let animationFrame = 0;
 
 main();
 
-// var then = 0;
-// // Draw the scene repeatedly
-// function render() {
-// 	// Draw for every buffer exists in webglManager
-// 	webglManager.drawHollowObjectScene();
-
-// 	// TURN ON THIS TO SEE ROTATE THE OBJECT.
-// 	animationFrame = requestAnimationFrame(render);
-// }
-
-//
-// Start here
-//
+/**
+ * @description Main function of WebglProgram.
+ * 
+ */
 function main() {
 	// Init webgl.
-	
 	// Get gl context.
 	const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 	// If we don't have a GL context, give up now
@@ -91,12 +77,12 @@ function main() {
 //   // Now set up the colors for the faces. We'll use solid colors
 //   // for each face.
 //   const faceColors = [
-// 	[1.0,  1.0,  1.0,  1.0],    // Front face: white
-// 	[1.0,  0.0,  0.0,  1.0],    // Back face: red
-// 	[0.0,  1.0,  0.0,  1.0],    // Top face: green
-// 	[0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
-// 	[1.0,  1.0,  0.0,  1.0],    // Right face: yellow
-// 	[1.0,  0.0,  1.0,  1.0],    // Left face: purple
+// 		[1.0,  1.0,  1.0,  1.0],    // Front face: white
+// 		[1.0,  0.0,  0.0,  1.0],    // Back face: red
+// 		[0.0,  1.0,  0.0,  1.0],    // Top face: green
+// 		[0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
+// 		[1.0,  1.0,  0.0,  1.0],    // Right face: yellow
+// 		[1.0,  0.0,  1.0,  1.0],    // Left face: purple
 //   ];
 
   	// Here's where we call the routine that builds all the

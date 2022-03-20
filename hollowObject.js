@@ -8,16 +8,17 @@
 class Edge {
     /**
      * @description Constructor of edge class.
-     * @param {number[][]} topology - List of list of vertices that represent edge faces. 
-     * @param {number[][]} color - List of list of integer that represent edge faces color.
+     * @param {number[6][4]} topology - List of list of vertices that represent edge faces. 
+     * @param {number[][4]} color - List of list of integer that represent edge faces color.
      */
     constructor(topology, color) {
         /**
          * @description List of list of vertices that represent edge faces.
-         * @type {number[][]}
+         * @type {number[6][4]}
          * @public
          * @example [[0, 1, 2, 3]] means there are 1 face with 4 vertices. Vertices index 0, 1, 2, and 3.
          * You can find the corresponding vertices in hollow object class.
+         * If possible, the number of vertices in each face should be 4 and the number of faces should be 6.
          */
         this.topology = topology;
         
@@ -38,13 +39,13 @@ class Edge {
 class HollowObject {
     /**
      * @description Constructor of hollow object class.
-     * @param {number[][]} vertices - List of list of vertices in hollow object.
+     * @param {number[][3]} vertices - List of list of vertices in hollow object.
      * @param {Edge[]} edges - List of edge in hollow object.
      **/
     constructor(vertices, edges) {
         /**
          * @description List of list of vertices in hollow object.
-         * @type {number[][]}
+         * @type {number[][3]}
          * @public
          */
         this.vertices = vertices;
@@ -80,6 +81,7 @@ class HollowObject {
          */
         let glFaceColors = [];
 
+        // Loop for each edge.
         let NumEdges = this.edge.length;
         for (let i = 0; i < NumEdges; i++) {
             let currentEdge = this.edge[i];
@@ -94,16 +96,24 @@ class HollowObject {
             let currentEdgeColors = []
             let NumFaces = currentTopology.length;
 
+            // Loop for each face.
             for (let j = 0; j < NumFaces; j++) {
                 let currentFace = currentTopology[j];
                 let NumVertices = currentFace.length;
+                
+                // For each vertex in face.
+                // Add vertex to current edge vertices.
                 for (let k = 0; k < NumVertices; k++) {
                     let currentVertex = this.vertices[currentFace[k]];
                     currentEdgeVertices.push(...currentVertex);
                 }
+                
+                // Add face color to current edge colors.
                 let currentColor = currentEdge.color[j];
                 currentEdgeColors.push(currentColor);
             }
+
+            // Add current edge vertices and colors to global vertices and colors.
             glVertices.push(currentEdgeVertices);
             glFaceColors.push(currentEdgeColors);
         }
