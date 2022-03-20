@@ -12,19 +12,15 @@ let animationFrame = 0;
 
 main();
 
-var then = 0;
-// Draw the scene repeatedly
-function render(now) {
-	now *= 0.0001;  // convert to seconds
-	const deltaTime = now - then;
-	then = now;
+// var then = 0;
+// // Draw the scene repeatedly
+// function render() {
+// 	// Draw for every buffer exists in webglManager
+// 	webglManager.drawHollowObjectScene();
 
-	// Draw for every buffer exists in webglManager
-	webglManager.drawHollowObjectScene(deltaTime);
-
-	// TURN ON THIS TO SEE ROTATE THE OBJECT.
-	animationFrame = requestAnimationFrame(render);
-}
+// 	// TURN ON THIS TO SEE ROTATE THE OBJECT.
+// 	animationFrame = requestAnimationFrame(render);
+// }
 
 //
 // Start here
@@ -110,10 +106,7 @@ function main() {
 
   	// console.log(JSON.stringify(hollowObject));
   	webglManager.initBuffersHollow(hollowObject);
-//   const buffers = webglManager.initBuffers(vertices, faceColors);
-
-  
-   animationFrame = requestAnimationFrame(render);
+	webglManager.drawHollowObjectScene();
 }
 
 

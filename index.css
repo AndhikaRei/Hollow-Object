@@ -3,6 +3,9 @@
     margin: 0;
 }
 
+.value-input {
+    margin-left: auto!important;
+}
 .container-fluid {
     padding: 0px !important;
 }

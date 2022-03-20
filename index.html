@@ -66,11 +66,14 @@
                         <div class="title-tools">Translasi</div>
                         <div class="slider-container">
                             <label for="translate-x" class="form-label">Translate-x</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="translate-x">
+                            <p class="d-inline value-input" id="translate-x-value">0</p>
+                            <input type="range" min="-400" max="400" value="0" step="1" class="form-range" id="translate-x">
                             <label for="translate-y" class="form-label">Translate-y</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="translate-y">
+                            <p class="d-inline value-input" id="translate-y-value">0</p>
+                            <input type="range" min="-400" max="400" value="0" step="1" class="form-range" id="translate-y">
                             <label for="translate-z" class="form-label">Translate-z</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="translate-z">
+                            <p class="d-inline value-input" id="translate-z-value">0</p>
+                            <input type="range" min="-400" max="400" value="0" step="1" class="form-range" id="translate-z">
                         </div>
                     </div>
                 </div>
@@ -80,11 +83,14 @@
                         <div class="title-tools">Rotasi</div>
                         <div class="slider-container">
                             <label for="rotate-x" class="form-label">Rotate-x</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="rotate-x">
+                            <p class="d-inline value-input" id="rotate-x-value">0</p>
+                            <input type="range" min="-360" max="360" value="0" step="1" class="form-range" id="rotate-x">
                             <label for="rotate-y" class="form-label">Rotate-y</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="rotate-y">
+                            <p class="d-inline value-input" id="rotate-y-value">0</p>
+                            <input type="range" min="-360" max="360" value="0" step="1" class="form-range" id="rotate-y">
                             <label for="rotate-z" class="form-label">Rotate-z</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="rotate-z">
+                            <p class="d-inline value-input" id="rotate-z-value">0</p>
+                            <input type="range" min="-360" max="360" value="0" step="1" class="form-range" id="rotate-z">
                         </div>
                     </div>
                 </div>
@@ -94,11 +100,14 @@
                         <div class="title-tools" >Skala</div>
                         <div class="slider-container">
                             <label for="scale-x" class="form-label">Scale-x</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="scale-x">
+                            <p class="d-inline value-input" id="scale-x-value">1</p>
+                            <input type="range" min="-5" max="5" value="1" step="0.1" class="form-range" id="scale-x">
                             <label for="scale-y" class="form-label">Scale-y</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="scale-y">
+                            <p class="d-inline value-input" id="scale-y-value">1</p>
+                            <input type="range" min="-5" max="5" value="1" step="0.1" class="form-range" id="scale-y">
                             <label for="scale-z" class="form-label">Scale-z</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="scale-z">
+                            <p class="d-inline value-input" id="scale-z-value">1</p>
+                            <input type="range" min="-5" max="5" value="1" step="0.1" class="form-range" id="scale-z">
                         </div>
                     </div>
                 </div>
@@ -108,9 +117,11 @@
                         <div class="title-tools"> Camera</div>
                         <div class="slider-container">
                             <label for="radius" class="form-label">Radius</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="camera-radius">
+                            <p class="d-inline value-input" id="camera-radius-value">89</p>
+                            <input type="range" min="0" max="179" value="89" step="1" class="form-range" id="camera-radius">
                             <label for="rotate" class="form-label">Rotate</label>
-                            <input type="range" min="-5" max="5" value="0" step="0.01" class="form-range" id="camera-rotate">
+                            <p class="d-inline value-input" id="camera-rotate-value">0</p>
+                            <input type="range" min="-360" max="360" value="0" step="1" class="form-range" id="camera-rotate">
                         </div>
                     </div>
                 </div>
@@ -124,8 +135,8 @@
                 <div class="col-3 pe-5 pt-4">
                     <label for="projectionView" class="form-label">Projection</label>
                     <select class="form-select mb-3" id="projection-view">
-                        <option value="1">Orthographic</option>
-                        <option value="2" selected>Perspective</option>
+                        <option value="1" selected>Orthographic</option>
+                        <option value="2">Perspective</option>
                         <option value="3">Oblique</option>
                     </select>
                     <label for="fileInput" class="form-label">Load File</label>
@@ -148,9 +159,10 @@
         integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
         crossorigin="anonymous" defer></script>
     <script type="text/javascript" src="./state.js"> </script>
+    <script type="text/javascript" src="./utility.js"> </script>
+    <script type="text/javascript" src="./mat4.js"> </script>
     <script type="text/javascript" src="./hollowObject.js"> </script>
     <script type="text/javascript" src="./webGl.js"> </script>
-    <script type="text/javascript" src="./utility.js"> </script>
     <script type="text/javascript" src="./main.js"> </script>
     <script type="text/javascript" src="./dom.js"> </script>
 </body>

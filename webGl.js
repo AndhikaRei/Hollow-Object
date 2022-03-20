@@ -158,6 +158,69 @@ class WebGlManager {
          * @public
          */
         this.faceColors = []
+
+        // Attribute for all transformation matrix.
+        /**
+         * translateValue - Translation for each axis.
+         * @type {number[]}
+         * @public
+         */
+        this.translateValue = [0, 0, 0];
+        
+        /**
+         * rotateAngle - Rotation angle for each axis.
+         * @type {number[]}
+         * @public
+         */
+        this.rotateAngle = [0, 0, 0];
+        
+        /**
+         * scaleValue - Scale for each axis.
+         * @type {number[]}
+         * @public
+         */
+        this.scaleValue = [1, 1, 1];
+        
+        /**
+         * cameraRadius - Radius of camera.
+         * @type {number}
+         * @public
+         */
+        this.cameraRadius = 5;
+
+        /**
+         * cameraRotation - Rotation of camera.
+         * @type {number}
+         * @public
+         */
+        this.cameraRotation = 0;
+
+        /**
+         * shaderState - State of shader.
+         * 0 - non-active
+         * 1 - active
+         * @type {number}
+         * @public
+         */
+        this.shaderState = 0;
+
+        /**
+         * projectionType - Type of projection.
+         * 1 - Orthographic
+         * 2 - Perspective
+         * 3 - Oblique
+         * @type {number}
+         * @public
+         */
+        this.projectionType = 1;
+
+        /**
+         * fov - Field of view.
+         * @type {number}
+         * @public
+         */
+        this.fov = 45;
+
     }
 
     /**
@@ -290,12 +353,10 @@ class WebGlManager {
     clearScreen() {
         this.gl.clearColor(0.8, 0.8, 0.8, 1.0);  // Clear to black, fully opaque
         this.gl.clearDepth(1.0);                 // Clear everything
-        this.gl.enable(this.gl.DEPTH_TEST);      // Enable depth testing
-        this.gl.depthFunc(this.gl.LEQUAL);       // Near things obscure far things
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
-    drawHollowObjectScene(deltaTime) {
+    drawHollowObjectScene() {
         // Clear the screen
         this.clearScreen();
 
@@ -306,58 +367,111 @@ class WebGlManager {
             // if (this.vertices[i] === undefined) {
             //     continue;
             // }
-            this.drawScene(this.buffers[i], deltaTime, this.vertices[i].length / 2);
+            this.drawScene(this.buffers[i], this.vertices[i].length / 2);
         }
+    }
+
+    /**
+     * @description calculate projection matrix.
+     * @returns {number[][]} projection matrix.
+     */
+    calculateProjectionMatrix() {
+        // Initialize variable for projection matrix.
+        const left = -2;
+        const right = 2;
+        const bottom = -2;
+        const top = 2;
+        const zNear = 0.1;
+        const zFar = 100.0;
+        const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
+        const fieldOfViewInRadians = degToRad(this.fov) 
+        let projectionMatrix = m4.identity();
+
+        // Orthographic projection.
+        if (this.projectionType == 1){
+            projectionMatrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
+        } 
+        // Perspective projection.
+        if (this.projectionType == 2){
+            projectionMatrix = m4.perspective(fieldOfViewInRadians, aspect, zNear, zFar);
+        }
+        
+        // Oblique projection
+
+        return projectionMatrix;
+    }
+
+    calculateModelViewMatrix(){
+        // Generate camera matrix.
+        let radius = this.cameraRadius;
+        let cameraAngleRadian = degToRad(this.cameraRotation);
+
+        // Compute a matrix for the camera.
+        let cameraMatrix = m4.yRotation(cameraAngleRadian);
+        cameraMatrix = m4.translate(cameraMatrix, 0, 0, radius);
+
+        // Make view matrix.
+        // View matrix is the inverse of camera matrix * rotation matrix.
+        let viewMatrix = m4.inverse(cameraMatrix);
+
+        // return viewMatrix;
+
+        // Rotate the view matrix.
+        viewMatrix = m4.xRotate(viewMatrix, degToRad(this.rotateAngle[0]));
+        viewMatrix = m4.yRotate(viewMatrix, degToRad(this.rotateAngle[1]));
+        viewMatrix = m4.zRotate(viewMatrix, degToRad(this.rotateAngle[2]));
+
+
+        // Make model view matrix.
+        // Model view matrix is initialized by translate and scaling matrix
+        // Model view matrix is the product of view matrix and model matrix.
+        let modelViewMatrix = m4.identity();
+        modelViewMatrix = m4.translate(modelViewMatrix, this.translateValue[0], 
+            this.translateValue[1], this.translateValue[2]);
+        modelViewMatrix = m4.scale(modelViewMatrix, this.scaleValue[0],
+            this.scaleValue[1], this.scaleValue[2]);
+        modelViewMatrix = m4.multiply(viewMatrix, modelViewMatrix);
+        
+        return modelViewMatrix;
     }
 
     /**
      * @description Draw scenarion.
      * @param {Buffers} buffers - buffers.
-     * @param {number} deltaTime - delta time.
      * @param {number} vertexCount - the number of vertext to draw.
      * @param {number} cubeRotation - cube rotation.
      */
-    drawScene(buffers, deltaTime, vertexCount) {
-      
-        // Create a perspective matrix, a special matrix that is
-        // used to simulate the distortion of perspective in a camera.
-        // Our field of view is 45 degrees, with a width/height
-        // ratio that matches the display size of the canvas
-        // and we only want to see objects between 0.1 units
-        // and 100 units away from the camera.
-      
-        const fieldOfView = 45 * Math.PI / 180;   // in radians
-        const aspect = this.gl.canvas.clientWidth / this.gl.canvas.clientHeight;
-        const zNear = 0.1;
-        const zFar = 100.0;
-        const projectionMatrix = mat4.create();
-      
-        // note: glmatrix.js always has the first argument
-        // as the destination to receive the result.
-        mat4.perspective(projectionMatrix,
-                         fieldOfView,
-                         aspect,
-                         zNear,
-                         zFar);
-      
+    drawScene(buffers, vertexCount) {
+        this.gl.enable(this.gl.DEPTH_TEST);           // Enable depth testing
+        this.gl.depthFunc(this.gl.LEQUAL); 
+    
+        // const projectionMatrix = m4.identity();
+        const projectionMatrix = this.calculateProjectionMatrix();
+
         // Set the drawing position to the "identity" point, which is
         // the center of the scene.
-        const modelViewMatrix = mat4.create();
+
+        // TODO: Buggy code
+        // const modelViewMatrix = m4.identity();
+        const modelViewMatrix = this.calculateModelViewMatrix();
+
+        // const modelViewMatrix = mat4.create();
       
-        // Now move the drawing position a bit to where we want to
-        // start drawing the square.
+        // // Now move the drawing position a bit to where we want to
+        // // start drawing the square.
       
-        mat4.translate(modelViewMatrix,     // destination matrix
-                       modelViewMatrix,     // matrix to translate
-                       [-0.0, 0.0, -6.0]);  // amount to translate
-        mat4.rotate(modelViewMatrix,  // destination matrix
-                    modelViewMatrix,  // matrix to rotate
-                    cubeRotation,     // amount to rotate in radians
-                    [0, 0, 1]);       // axis to rotate around (Z)
-        mat4.rotate(modelViewMatrix,  // destination matrix
-                    modelViewMatrix,  // matrix to rotate
-                    cubeRotation * .7,// amount to rotate in radians
-                    [0, 1, 0]);       // axis to rotate around (X)
+        // mat4.translate(modelViewMatrix,     // destination matrix
+        //                modelViewMatrix,     // matrix to translate
+        //                [-0.0, 0.0, -6.0]);  // amount to translate
+        // mat4.rotate(modelViewMatrix,  // destination matrix
+        //             modelViewMatrix,  // matrix to rotate
+        //             cubeRotation,     // amount to rotate in radians
+        //             [0, 0, 1]);       // axis to rotate around (Z)
+        // mat4.rotate(modelViewMatrix,  // destination matrix
+        //             modelViewMatrix,  // matrix to rotate
+        //             cubeRotation * .7,// amount to rotate in radians
+        //             [0, 1, 0]);       // axis to rotate around (X)
+
       
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute
@@ -423,7 +537,6 @@ class WebGlManager {
       
         // Update the rotation for the next draw
       
-        cubeRotation += deltaTime;
       }
 }
 

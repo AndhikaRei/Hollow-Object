@@ -1,6 +1,25 @@
 // Reference: https://webglfundamentals.org/
 
 /**
+ * @description Convert radian to degree.
+ * @param {number} r 
+ * @returns {number} degree
+ */
+function radToDeg(r) {
+    return r * 180 / Math.PI;
+}
+
+/**
+ * @description Convert degree to radian.
+ * @param {number} d 
+ * @returns {number} radian
+ */
+function degToRad(d) {
+    return d * Math.PI / 180;
+}
+
+
+/**
  * @description Substract vector a from vector b.
  * @param {number[]} a - vector a 
  * @param {number[]} b - vector b 
@@ -59,16 +78,46 @@ const m4 = {
   },
 
 	perspective: function(fieldOfViewInRadians, aspect, near, far) {
-    var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
-    var rangeInv = 1.0 / (near - far);
+		var f = Math.tan(Math.PI * 0.5 - 0.5 * fieldOfViewInRadians);
+		var rangeInv = 1.0 / (near - far);
 
-    return [
-      f / aspect, 0, 0, 0,
-      0, f, 0, 0,
-      0, 0, (near + far) * rangeInv, -1,
-      0, 0, near * far * rangeInv * 2, 0
-    ];
-  },
+		return [
+			f / aspect, 0, 0, 0,
+			0, f, 0, 0,
+			0, 0, (near + far) * rangeInv, -1,
+			0, 0, near * far * rangeInv * 2, 0
+		];
+	},
+
+	// fov, aspec, znear, zfar
+	perspective2: function(fieldOfViewInRadians, aspect, zNear, zFar) {
+		var u = 1 / Math.tan(fieldOfViewInRadians / 2);
+		var o = void 0;
+		var t = [];
+		t[0] = u / aspect;
+		t[1] = 0; 
+		t[2] = 0; 
+		t[3] = 0; 
+		t[4] = 0; 
+		t[5] = u; 
+		t[6] = 0; 
+		t[7] = 0; 
+		t[8] = 0; 
+		t[9] = 0; 
+		t[11] = -1; 
+		t[12] = 0;
+		t[13] = 0; 
+		t[15] = 0;
+		if (null != zFar && zFar !== 1 / 0 ) {
+			o = 1 / (zNear - zFar); 
+			t[10] = (zFar + zNear) * o; 
+			t[14] = 2 * zFar * zNear * o;
+		} else {
+			t[10] = -1
+			t[14] = -2 * zNear
+		}
+		return t
+	},
 
 	projection: function(width, height, depth) {
 		// Note: This matrix flips the Y axis so 0 is at the top.
@@ -81,23 +130,23 @@ const m4 = {
 	},
 
 	orthographic: function(left, right, bottom, top, near, far) {
-    return [
-      2 / (right - left), 0, 0, 0,
-      0, 2 / (top - bottom), 0, 0,
-      0, 0, 2 / (near - far), 0,
- 
-      (left + right) / (left - right),
-      (bottom + top) / (bottom - top),
-      (near + far) / (near - far),
-      1,
-    ];
+		return [
+			2 / (right - left), 0, 0, 0,
+			0, 2 / (top - bottom), 0, 0,
+			0, 0, 2 / (near - far), 0,
+		
+			(left + right) / (left - right),
+			(bottom + top) / (bottom - top),
+			(near + far) / (near - far),
+			1,
+		];
 	},
 
 	oblique: function (theta, phi) {
 		let t = theta * Math.PI / 180;
-    let p = phi * Math.PI / 180;
-    let cotT = -1/Math.tan(t);
-    let cotP = -1/Math.tan(p);
+		let p = phi * Math.PI / 180;
+		let cotT = -1/Math.tan(t);
+		let cotP = -1/Math.tan(p);
 
 		let matrix = [
 			1, 0, cotT, 0,
