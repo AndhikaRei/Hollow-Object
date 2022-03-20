@@ -212,7 +212,7 @@ class WebGlManager {
          * @type {number}
          * @public
          */
-        this.projectionType = 1;
+        this.projectionType = 2;
 
         /**
          * fov - Field of view.
@@ -339,8 +339,9 @@ class WebGlManager {
         // Save vertex positions and colors.
         this.vertices = vertices;
         this.faceColors = faceColors;
-        
-        // Ini buffer for all edges.
+
+        // Init buffer for all edges.
+        this.buffers = [];
         for (let i = 0; i < vertices.length; i ++) {
             const buffer = this.initBuffers(vertices[i], faceColors[i]);
             this.buffers.push(buffer);
@@ -414,20 +415,15 @@ class WebGlManager {
         // View matrix is the inverse of camera matrix * rotation matrix.
         let viewMatrix = m4.inverse(cameraMatrix);
 
-        // return viewMatrix;
-
-        // Rotate the view matrix.
-        viewMatrix = m4.xRotate(viewMatrix, degToRad(this.rotateAngle[0]));
-        viewMatrix = m4.yRotate(viewMatrix, degToRad(this.rotateAngle[1]));
-        viewMatrix = m4.zRotate(viewMatrix, degToRad(this.rotateAngle[2]));
-
-
         // Make model view matrix.
         // Model view matrix is initialized by translate and scaling matrix
         // Model view matrix is the product of view matrix and model matrix.
         let modelViewMatrix = m4.identity();
         modelViewMatrix = m4.translate(modelViewMatrix, this.translateValue[0], 
             this.translateValue[1], this.translateValue[2]);
+        modelViewMatrix = m4.xRotate(modelViewMatrix, degToRad(this.rotateAngle[0]));
+        modelViewMatrix = m4.yRotate(modelViewMatrix, degToRad(this.rotateAngle[1]));
+        modelViewMatrix = m4.zRotate(modelViewMatrix, degToRad(this.rotateAngle[2]));
         modelViewMatrix = m4.scale(modelViewMatrix, this.scaleValue[0],
             this.scaleValue[1], this.scaleValue[2]);
         modelViewMatrix = m4.multiply(viewMatrix, modelViewMatrix);
