@@ -90,7 +90,7 @@ function main() {
   	// Load cube.
   	hollowObject = loadHollowH();
 
-  	// console.log(JSON.stringify(hollowObject));
+  	console.log(JSON.stringify(hollowObject));
   	webglManager.initBuffersHollow(hollowObject);
 	webglManager.drawHollowObjectScene();
 }
