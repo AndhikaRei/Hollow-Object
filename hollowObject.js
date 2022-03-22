@@ -2659,7 +2659,6 @@ const loadHollowTrapezoidalPrism = () => {
 
     return new HollowObject(vertices, edges);
 }
-<<<<<<< HEAD
 
 const LoadPyramid = () => {
     // All vertices in hollow object.
@@ -2997,5 +2996,3 @@ const LoadHollowPyramid = () => {
 
     return new HollowObject(vertices, edges);
 }
-=======
->>>>>>> 7fa5799b9d264256cb82b0e9894cabc868970b22
