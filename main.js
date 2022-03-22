@@ -88,10 +88,9 @@ function main() {
   	// Here's where we call the routine that builds all the
   	// objects we'll be drawing.
   	// Load cube.
-  	hollowObject = loadBasicTrapezoidalPrism();
-	console.log(JSON.stringify(loadBasicTrapezoidalPrism()));
+  	hollowObject = loadHollowH();
 
-  	// console.log(JSON.stringify(hollowObject));
+  	console.log(JSON.stringify(hollowObject));
   	webglManager.initBuffersHollow(hollowObject);
 	webglManager.drawHollowObjectScene();
 }

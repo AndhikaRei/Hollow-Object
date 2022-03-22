@@ -333,20 +333,20 @@ class WebGlManager {
         // Orthographic projection.
         if (this.projectionType == 1){
             projectionMatrix = m4.orthographic(left, right, bottom, top, zNear, zFar);
-            console.log(projectionMatrix);
+            // console.log(projectionMatrix);
         } 
         // Perspective projection.
         if (this.projectionType == 2){
             projectionMatrix = m4.perspective(fieldOfViewInRadians, aspect, zNear, zFar);
-            console.log(projectionMatrix);
+            // console.log(projectionMatrix);
         }
         
         if (this.projectionType == 3){
             let orto = m4.orthographic(left, right, bottom, top, zNear, zFar);
             let oblique = m4.oblique(45,45);
             projectionMatrix = m4.multiply(oblique, orto);
-            console.log("here");
-            console.log(projectionMatrix);
+            // console.log("here");
+            // console.log(projectionMatrix);
         }
         // Oblique projection
         return projectionMatrix;
