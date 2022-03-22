@@ -147,8 +147,8 @@ const m4 = {
 	oblique: function (theta, phi) {
 		let t = theta * Math.PI / 180;
 		let p = phi * Math.PI / 180;
-		let cotT = -1/Math.tan(t);
-		let cotP = -1/Math.tan(p);
+		let cotT = -1/Math.tan(t)
+		let cotP = -1/Math.tan(p)
 
 		let matrix = [
 			1, 0, cotT, 0,
@@ -156,7 +156,6 @@ const m4 = {
 			0, 0, 1, 0,
 			0, 0, 0, 1
 		];
-
 		return m4.transpose(matrix);
 	},
 
