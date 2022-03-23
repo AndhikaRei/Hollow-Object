@@ -76,64 +76,8 @@ function main() {
 
 	// Init webglManager.
 	webglManager = new WebGlManager(gl, vertexShader, fragmentShader, shaderProgram);
-
-// 	// Object to be used in init buffers.
-// 	// Now create an array of positions for the cube.
-// 	const vertices = [
-// 		// Front face
-// 		-1.0, -1.0,  1.0,
-// 		1.0, -1.0,  1.0,
-// 		1.0,  1.0,  1.0,
-// 		-1.0,  1.0,  1.0,
-
-// 		// Back face
-// 		-1.0, -1.0, -1.0,
-// 		-1.0,  1.0, -1.0,
-// 		1.0,  1.0, -1.0,
-// 		1.0, -1.0, -1.0,
-
-// 		// Top face
-// 		-1.0,  1.0, -1.0,
-// 		-1.0,  1.0,  1.0,
-// 		1.0,  1.0,  1.0,
-// 		1.0,  1.0, -1.0,
-
-// 		// Bottom face
-// 		-1.0, -1.0, -1.0,
-// 		1.0, -1.0, -1.0,
-// 		1.0, -1.0,  1.0,
-// 		-1.0, -1.0,  1.0,
-
-// 		// Right face
-// 		1.0, -1.0, -1.0,
-// 		1.0,  1.0, -1.0,
-// 		1.0,  1.0,  1.0,
-// 		1.0, -1.0,  1.0,
-
-// 		// Left face
-// 		-1.0, -1.0, -1.0,
-// 		-1.0, -1.0,  1.0,
-// 		-1.0,  1.0,  1.0,
-// 		-1.0,  1.0, -1.0,
-// 	];   
-
-//   // Now set up the colors for the faces. We'll use solid colors
-//   // for each face.
-//   const faceColors = [
-// 		[1.0,  1.0,  1.0,  1.0],    // Front face: white
-// 		[1.0,  0.0,  0.0,  1.0],    // Back face: red
-// 		[0.0,  1.0,  0.0,  1.0],    // Top face: green
-// 		[0.0,  0.0,  1.0,  1.0],    // Bottom face: blue
-// 		[1.0,  1.0,  0.0,  1.0],    // Right face: yellow
-// 		[1.0,  0.0,  1.0,  1.0],    // Left face: purple
-//   ];
-
-  	// Here's where we call the routine that builds all the
-  	// objects we'll be drawing.
-  	// Load cube.
   	hollowObject = loadHollowH();
 
-  	console.log(JSON.stringify(hollowObject));
   	webglManager.initBuffersHollow(hollowObject);
 	webglManager.drawHollowObjectScene();
 }
