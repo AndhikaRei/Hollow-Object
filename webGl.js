@@ -402,43 +402,30 @@ class WebGlManager {
       
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute
-        {
-            const numComponents = 3;
-            const type = this.gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position);
-            this.gl.vertexAttribPointer(
-                this.programInfo.attribLocations.vertexPosition,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset);
-            this.gl.enableVertexAttribArray(
-                this.programInfo.attribLocations.vertexPosition);
-        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.position);
+        this.gl.vertexAttribPointer(
+            this.programInfo.attribLocations.vertexPosition,
+            3, // The number of elements per iteration
+            this.gl.FLOAT, // The type of the data
+            false, // Specify if the data needs to be normalized
+            0, // The space in bytes between elements
+            0); // Offset from the beginning of the buffer
+        this.gl.enableVertexAttribArray(
+            this.programInfo.attribLocations.vertexPosition);
+        
       
         // Tell WebGL how to pull out the colors from the color buffer
         // into the vertexColor attribute.
-        {
-            const numComponents = 4;
-            const type = this.gl.FLOAT;
-            const normalize = false;
-            const stride = 0;
-            const offset = 0;
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.color);
-            this.gl.vertexAttribPointer(
-                this.programInfo.attribLocations.vertexColor,
-                numComponents,
-                type,
-                normalize,
-                stride,
-                offset);
-            this.gl.enableVertexAttribArray(
-                this.programInfo.attribLocations.vertexColor);
-        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.color);
+        this.gl.vertexAttribPointer(
+            this.programInfo.attribLocations.vertexColor,
+            4, // The number of elements per iteration
+            this.gl.FLOAT, // The type of the data
+            false, // Whether to normalize the data (usually false)
+            0, // The space in bytes between elements
+            0); // The offset, in bytes, to the first element
+        this.gl.enableVertexAttribArray(
+            this.programInfo.attribLocations.vertexColor);
       
         // Tell WebGL which indices to use to index the vertices
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
@@ -456,12 +443,7 @@ class WebGlManager {
             false,
             modelViewMatrix);
       
-        {
-            const type = this.gl.UNSIGNED_SHORT;
-            const offset = 0;
-            this.gl.drawElements(this.gl.TRIANGLES, vertexCount, type, offset);
-        }
-      
+        this.gl.drawElements(this.gl.TRIANGLES, vertexCount, this.gl.UNSIGNED_SHORT, 0);
     }
 }
 
