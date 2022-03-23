@@ -11,7 +11,7 @@ class Buffers {
      * @param {WebGLBuffer} color 
      * @param {WebGLBuffer} indices 
      */
-    constructor(position, color, indices) {
+    constructor(position, color, indices, normal) {
         /**
          * @type {WebGLBuffer}
          * @description WebGLBuffer of position.
@@ -32,6 +32,13 @@ class Buffers {
          * @public
          */
         this.indices = indices;
+
+        /**
+         * @type {WebGLBuffer}
+         * @description WebGLBuffer of normal.
+         * @public
+         */
+         this.normal = normal;
     }
 }
 
@@ -64,6 +71,7 @@ class programInfo {
         this.attribLocations = {
             vertexPosition: this.gl.getAttribLocation(program, 'aVertexPosition'),
             vertexColor: this.gl.getAttribLocation(program, 'aVertexColor'),
+            vertexNormal: this.gl.getAttribLocation(program, 'aVertexNormal')
         };
 
         /**
@@ -76,6 +84,8 @@ class programInfo {
         this.uniformLocations = {
             projectionMatrix: this.gl.getUniformLocation(program, 'uProjectionMatrix'),
             modelViewMatrix: this.gl.getUniformLocation(program, 'uModelViewMatrix'),
+            normalMatrix: this.gl.getUniformLocation(program, 'uNormalMatrix'),
+            shadingBool: this.gl.getUniformLocation(program, 'uShading')
         };
     }
 }
@@ -100,6 +110,7 @@ class WebGlManager {
          * @public
          */
         // Init WebGL context.
+        this.useShading = false;
         this.gl = gl
 
         // Set webgl viewport.
@@ -253,6 +264,11 @@ class WebGlManager {
         const indexBuffer = this.gl.createBuffer();
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
 
+        const normalBuffer = this.gl.createBuffer();
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER,normalBuffer);
+
+        const vertexNormal = getVectorNormal(vertices);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(vertexNormal),this.gl.STATIC_DRAW);
         // Now pass the list of positions into WebGL to build the
         // shape. We do this by creating a Float32Array from the
         // JavaScript array, then use it to fill the current buffer.
@@ -266,8 +282,8 @@ class WebGlManager {
         ];
         // Now send the element array to GL
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), this.gl.STATIC_DRAW);
-
-        return new Buffers(positionBuffer, colorBuffer, indexBuffer);
+        
+        return new Buffers(positionBuffer, colorBuffer, indexBuffer, normalBuffer);
     };
 
     /**
@@ -399,7 +415,8 @@ class WebGlManager {
         // Calculate projection matrix.
         const projectionMatrix = this.calculateProjectionMatrix();
         const modelViewMatrix = this.calculateModelViewMatrix();
-      
+        let normalMatrix = m4.inverse(modelViewMatrix);
+        normalMatrix = m4.transpose(normalMatrix);
         // Tell WebGL how to pull out the positions from the position
         // buffer into the vertexPosition attribute
         {
@@ -439,6 +456,24 @@ class WebGlManager {
             this.gl.enableVertexAttribArray(
                 this.programInfo.attribLocations.vertexColor);
         }
+
+        {
+            const numComponents = 3;
+            const type = this.gl.FLOAT;
+            const normalize = false;
+            const stride = 0;
+            const offset = 0;
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, buffers.normal);
+            this.gl.vertexAttribPointer(
+                this.programInfo.attribLocations.vertexNormal,
+                numComponents,
+                type,
+                normalize,
+                stride,
+                offset);
+            this.gl.enableVertexAttribArray(
+                this.programInfo.attribLocations.vertexNormal);
+        }
       
         // Tell WebGL which indices to use to index the vertices
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, buffers.indices);
@@ -455,13 +490,23 @@ class WebGlManager {
             this.programInfo.uniformLocations.modelViewMatrix,
             false,
             modelViewMatrix);
-      
+        this.gl.uniformMatrix4fv(
+            this.programInfo.uniformLocations.normalMatrix,
+            false,
+            normalMatrix);
+        this.gl.uniform1i(
+                this.programInfo.uniformLocations.shadingBool,
+                this.useShading);
         {
             const type = this.gl.UNSIGNED_SHORT;
             const offset = 0;
             this.gl.drawElements(this.gl.TRIANGLES, vertexCount, type, offset);
         }
       
+    }
+
+    changeShaders(){
+        this.useShading = !this.useShading;
     }
 }
 
@@ -524,4 +569,5 @@ const createProgram = (gl, vertexShader, fragmentShader) => {
     alert('Failed to initialize the shader program.');
     gl.deleteProgram(program);
 };
+
 // ==================================================================================================

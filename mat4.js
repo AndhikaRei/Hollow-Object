@@ -56,6 +56,24 @@ function cross(a, b) {
           a[0] * b[1] - a[1] * b[0]];
 }
 
+function getVectorNormal(vpos) {
+	const n = vpos.length;
+	var vNormals = [];
+	for (let i = 0; i < n; i += 12){
+	  const p1 = [vpos[i], vpos[i+1], vpos[i+2]];
+	  const p2 = [vpos[i+3], vpos[i+4], vpos[i+5]];
+	  const p3 = [vpos[i+6], vpos[i+7], vpos[i+8]];
+	  const vec1 = subtractVectors(p2, p1);
+	  const vec2 = subtractVectors(p3, p1);
+	  const normalDirection = cross(vec1, vec2);
+	  const vecNormal  = normalize(normalDirection);
+	  for (let j = 0; j < 4; j++){
+		vNormals = vNormals.concat(vecNormal);
+	  }
+	}
+	return vNormals;
+  } 
+
 const m4 = {
 	/**
 	 * @description Create lookAt matrix.

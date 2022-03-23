@@ -215,3 +215,8 @@ projectionView.addEventListener('change', () => {
 defaultViewButton.addEventListener('click', () => {
     resetDefault();
 });
+
+shaderBtn.addEventListener('click', () => {
+    webglManager.changeShaders();
+    webglManager.drawHollowObjectScene();
+});
